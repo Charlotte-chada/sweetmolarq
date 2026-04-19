@@ -1,12 +1,16 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import type { Recipe, RecipeLine } from '@/types'
 
 export function useRecipes(userId: string | undefined) {
-  // Stable client — created once, not every render
-  const supabase = useMemo(() => createClient(), [])
+  // Lazy client — only created in the browser, never during SSR
+  const clientRef = useRef<ReturnType<typeof createClient> | null>(null)
+  function getClient() {
+    if (!clientRef.current) clientRef.current = createClient()
+    return clientRef.current
+  }
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState<string | null>(null)
@@ -14,7 +18,7 @@ export function useRecipes(userId: string | undefined) {
   const fetch = useCallback(async () => {
     if (!userId) return
     setLoading(true)
-    const { data, error: e } = await supabase
+    const { data, error: e } = await getClient()
       .from('recipes')
       .select(`
         *,
@@ -27,7 +31,7 @@ export function useRecipes(userId: string | undefined) {
     if (e) setError(e.message)
     else setRecipes(data as Recipe[])
     setLoading(false)
-  }, [userId, supabase])
+  }, [userId])
 
   useEffect(() => { fetch() }, [fetch])
 
@@ -35,7 +39,7 @@ export function useRecipes(userId: string | undefined) {
     payload: Pick<Recipe, 'name' | 'category' | 'batch_yield' | 'note'>
   ) => {
     if (!userId) return null
-    const { data, error: e } = await supabase
+    const { data, error: e } = await getClient()
       .from('recipes')
       .insert({ ...payload, user_id: userId })
       .select()
@@ -44,13 +48,13 @@ export function useRecipes(userId: string | undefined) {
     const newRecipe = { ...data, recipe_lines: [] } as Recipe
     setRecipes(prev => [newRecipe, ...prev])
     return newRecipe
-  }, [userId, supabase])
+  }, [userId])
 
   const updateRecipe = useCallback(async (
     id: string,
     payload: Partial<Pick<Recipe, 'name' | 'category' | 'batch_yield' | 'note'>>
   ) => {
-    const { data, error: e } = await supabase
+    const { data, error: e } = await getClient()
       .from('recipes')
       .update({ ...payload, updated_at: new Date().toISOString() })
       .eq('id', id)
@@ -58,21 +62,21 @@ export function useRecipes(userId: string | undefined) {
       .single()
     if (e) { setError(e.message); return }
     setRecipes(prev => prev.map(r => r.id === id ? { ...r, ...data } : r))
-  }, [supabase])
+  }, [])
 
   const deleteRecipe = useCallback(async (id: string) => {
-    const { error: e } = await supabase.from('recipes').delete().eq('id', id)
+    const { error: e } = await getClient().from('recipes').delete().eq('id', id)
     if (e) { setError(e.message); return false }
     setRecipes(prev => prev.filter(r => r.id !== id))
     return true
-  }, [supabase])
+  }, [])
 
   // ── Recipe Lines ────────────────────────────────────────
   const addLine = useCallback(async (
     recipeId: string,
     line: { ingredient_id: string; quantity: number; note?: string }
   ) => {
-    const { data, error: e } = await supabase
+    const { data, error: e } = await getClient()
       .from('recipe_lines')
       .insert({ ...line, recipe_id: recipeId })
       .select(`*, ingredient:ingredients (*)`)
@@ -83,24 +87,24 @@ export function useRecipes(userId: string | undefined) {
         ? { ...r, recipe_lines: [...(r.recipe_lines ?? []), data as any] }
         : r
     ))
-  }, [supabase])
+  }, [])
 
   const removeLine = useCallback(async (recipeId: string, lineId: string) => {
-    const { error: e } = await supabase.from('recipe_lines').delete().eq('id', lineId)
+    const { error: e } = await getClient().from('recipe_lines').delete().eq('id', lineId)
     if (e) { setError(e.message); return }
     setRecipes(prev => prev.map(r =>
       r.id === recipeId
         ? { ...r, recipe_lines: (r.recipe_lines ?? []).filter(l => l.id !== lineId) }
         : r
     ))
-  }, [supabase])
+  }, [])
 
   const updateLine = useCallback(async (
     recipeId: string,
     lineId: string,
     payload: { quantity?: number; note?: string }
   ) => {
-    const { data, error: e } = await supabase
+    const { data, error: e } = await getClient()
       .from('recipe_lines')
       .update(payload)
       .eq('id', lineId)
@@ -117,7 +121,7 @@ export function useRecipes(userId: string | undefined) {
           }
         : r
     ))
-  }, [supabase])
+  }, [])
 
   return {
     recipes, loading, error, refetch: fetch,
