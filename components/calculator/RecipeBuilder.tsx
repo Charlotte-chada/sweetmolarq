@@ -71,7 +71,7 @@ export default function RecipeBuilder({
   const selectedIng = ingredients.find(i => i.id === addIngId)
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 min-h-[500px]">
+    <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 min-h-125">
 
       {/* ── SIDEBAR: recipe list ── */}
       <div className="flex flex-col gap-2">
@@ -250,7 +250,7 @@ export default function RecipeBuilder({
               เพิ่มส่วนผสม
             </p>
             <div className="flex gap-2 flex-wrap items-end">
-              <div className="flex-1 min-w-[160px]">
+              <div className="flex-1 min-w-40">
                 <select
                   className="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg
                              bg-white focus:outline-none focus:border-accent"
@@ -301,7 +301,7 @@ export default function RecipeBuilder({
             if (!total) return null
             return (
               <div className="border-t border-gray-200 px-5 py-4
-                              bg-gradient-to-r from-orange-50 to-pink-50">
+                              bg-linear-to-r from-orange-50 to-pink-50">
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <p className="text-[10px] text-gray-400 mb-1">ต้นทุน / batch</p>

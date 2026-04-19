@@ -43,7 +43,7 @@ export default function IngredientLibrary({ ingredients, loading, onCreate, onUp
       {/* toolbar */}
       <div className="flex items-center gap-2 flex-wrap">
         <input
-          className="flex-1 min-w-[160px] px-3 py-1.5 text-xs border border-gray-200
+          className="flex-1 min-w-40 px-3 py-1.5 text-xs border border-gray-200
                      rounded-full bg-gray-50 focus:outline-none focus:border-accent"
           placeholder="🔍 ค้นหาชื่อ หรือ ยี่ห้อ..."
           value={search}

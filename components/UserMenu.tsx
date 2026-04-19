@@ -47,7 +47,7 @@ export default function UserMenu() {
             {initials}
           </span>
         )}
-        <span className="text-xs font-semibold text-gray-700 hidden sm:block max-w-[120px] truncate">
+        <span className="text-xs font-semibold text-gray-700 hidden sm:block max-w-30 truncate">
           {name.split(' ')[0]}
         </span>
         <span className="text-gray-400 text-[10px]">▾</span>

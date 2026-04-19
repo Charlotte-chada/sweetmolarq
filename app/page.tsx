@@ -130,9 +130,9 @@ export default function HomePage() {
       {/* ═══ HERO ═══ */}
       <section className="relative overflow-hidden bg-white text-center px-6 py-24">
         {/* soft gradient orbs */}
-        <div className="pointer-events-none absolute -top-40 -right-20 w-[500px] h-[500px] rounded-full opacity-[0.15]"
+        <div className="pointer-events-none absolute -top-40 -right-20 w-125 h-125 rounded-full opacity-[0.15]"
           style={{ background: '#C97B4B', filter: 'blur(90px)' }} />
-        <div className="pointer-events-none absolute -bottom-20 -left-16 w-[380px] h-[380px] rounded-full opacity-[0.12]"
+        <div className="pointer-events-none absolute -bottom-20 -left-16 w-95 h-95 rounded-full opacity-[0.12]"
           style={{ background: '#E87D9E', filter: 'blur(80px)' }} />
 
         <div className="relative z-10 max-w-2xl mx-auto">
@@ -186,7 +186,7 @@ export default function HomePage() {
       {/* ═══ SEARCH / QUICK NAV ═══ */}
       <div className="bg-white border-t border-b border-gray-200 px-6 py-5 text-center">
         <p className="text-[10px] font-bold tracking-widest uppercase text-gray-400 mb-3">ฉันต้องการ...</p>
-        <div className="flex items-center gap-2 bg-gray-50 border-[1.5px] border-gray-200 rounded-full px-4 py-2 max-w-[440px] mx-auto mb-3 hover:border-accent transition-colors cursor-text">
+        <div className="flex items-center gap-2 bg-gray-50 border-[1.5px] border-gray-200 rounded-full px-4 py-2 max-w-110 mx-auto mb-3 hover:border-accent transition-colors cursor-text">
           <span className="text-gray-400">🔍</span>
           <span className="text-sm text-gray-400"><strong className="text-gray-700">คำนวณต้นทุนกาแฟ</strong>, วิเคราะห์เมนู, คำนวณ break-even...</span>
         </div>
@@ -223,7 +223,7 @@ export default function HomePage() {
                 <div className={`w-12 h-12 ${tool.iconBg} rounded-xl flex items-center justify-center text-2xl`}>
                   {tool.emoji}
                 </div>
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-orange-50 to-pink-50 border border-orange-200 text-accent-dk">
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-linear-to-r from-orange-50 to-pink-50 border border-orange-200 text-accent-dk">
                   ฟรีตลอดกาล
                 </span>
               </div>
@@ -238,7 +238,7 @@ export default function HomePage() {
               <div className="border-t border-gray-100 pt-3 flex flex-col gap-1.5 mt-auto">
                 {tool.feats.map(f => (
                   <div key={f} className="flex items-center gap-2 text-[11px] text-gray-600 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full grad-bg flex-shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full grad-bg shrink-0" />
                     {f}
                   </div>
                 ))}
@@ -275,7 +275,7 @@ export default function HomePage() {
                 <ul className="flex flex-col gap-1.5">
                   {card.items.map(item => (
                     <li key={item} className="flex gap-2 text-[11px] text-gray-700 font-medium items-start leading-relaxed">
-                      <span className={`${card.arrow} font-bold mt-0.5 flex-shrink-0`}>→</span>
+                      <span className={`${card.arrow} font-bold mt-0.5 shrink-0`}>→</span>
                       {item}
                     </li>
                   ))}
@@ -339,7 +339,7 @@ export default function HomePage() {
                 'คำนวณ real-time ไม่ต้องดาวน์โหลด ไม่ต้องติดตั้ง',
               ].map(f => (
                 <li key={f} className="flex gap-2 text-xs text-gray-700 font-medium items-start leading-relaxed">
-                  <span className="grad-text font-black mt-0.5 flex-shrink-0">✓</span>
+                  <span className="grad-text font-black mt-0.5 shrink-0">✓</span>
                   {f}
                 </li>
               ))}
@@ -363,7 +363,7 @@ export default function HomePage() {
         <h2 className="text-3xl font-extrabold text-ink tracking-tight mb-6">ทำไมถึงสร้าง SweetMolarQ?</h2>
 
         {/* quote */}
-        <div className="border-l-4 border-l-accent bg-gradient-to-r from-orange-50 to-pink-50 rounded-r-2xl px-6 py-5 mb-6">
+        <div className="border-l-4 border-l-accent bg-linear-to-r from-orange-50 to-pink-50 rounded-r-2xl px-6 py-5 mb-6">
           <p className="text-base text-ink leading-relaxed mb-2">
             "เคยทำขนมขาย เคยเป็นบาริสต้า — ตอนนั้นรู้สึกว่าการคิดต้นทุนมันยากมาก แต่พอลองทำจริงๆ มันช่วยได้จริง เพราะถ้าไม่คิดต้นทุน เราไม่มีทางรู้เลยว่าเรากำไรหรือเปล่า"
           </p>
@@ -383,7 +383,7 @@ export default function HomePage() {
           <div className="flex flex-col gap-3">
             {BELIEFS.map(b => (
               <div key={b.icon} className="flex gap-3 text-sm text-gray-700 items-start leading-relaxed">
-                <span className="text-base flex-shrink-0">{b.icon}</span>
+                <span className="text-base shrink-0">{b.icon}</span>
                 <span>{b.text}</span>
               </div>
             ))}
@@ -394,7 +394,7 @@ export default function HomePage() {
       {/* ═══ CTA BAND ═══ */}
       <section className="relative overflow-hidden bg-white border-t border-gray-200 px-6 py-20 text-center">
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="w-[600px] h-[400px] rounded-full opacity-[0.08]"
+          <div className="w-150 h-100 rounded-full opacity-[0.08]"
             style={{ background: 'linear-gradient(135deg, #C97B4B, #E87D9E)', filter: 'blur(80px)' }} />
         </div>
         <div className="relative z-10">
