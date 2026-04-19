@@ -1,24 +1,69 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap');
 
 @theme {
-  /* Modern Espresso + Amber — warm, clean, no pink */
-  --color-coffee:         #1C1917;   /* stone-900  — deep espresso, headings */
-  --color-caramel:        #D97706;   /* amber-600  — warm gold accent */
-  --color-caramel-pale:   #FFFBEB;   /* amber-50   — pale tint */
-  --color-caramel-border: #FDE68A;   /* amber-200  — borders */
-  --color-cream:          #FAFAF9;   /* stone-50   — clean background */
-  --color-cream-border:   #E7E5E4;   /* stone-200  — dividers */
-  --color-muted:          #78716C;   /* stone-500  — muted text */
-  --color-pink:           #EC4899;   /* pink-500   — accent highlight */
+  /* ── Brand gradient: warm brown → orange → dusty pink ── */
+  --color-g-start:   #C97B4B;
+  --color-g-mid:     #E8845A;
+  --color-g-end:     #E87D9E;
+
+  /* ── Accent (solid) ── */
+  --color-accent:    #E8845A;
+  --color-accent-dk: #C96840;
+  --color-accent-lt: #FDF1EC;
+
+  /* ── Warm tints ── */
+  --color-pink-lt:   #FDF0F5;
+  --color-brown-lt:  #FBF0E8;
+
+  /* ── Neutrals ── */
+  --color-bg:        #F7F7F8;
+  --color-ink:       #1A1A22;
+  --color-ink-soft:  #2D2D38;
+  --color-gray-50:   #F9F9FA;
+  --color-gray-100:  #F0F0F2;
+  --color-gray-200:  #E2E2E6;
+  --color-gray-300:  #C8C8CE;
+  --color-gray-500:  #8A8A94;
+  --color-gray-700:  #4A4A52;
+
+  /* ── Legacy aliases (used by inner pages) ── */
+  --color-coffee:        #1A1A22;
+  --color-caramel:       #E8845A;
+  --color-caramel-pale:  #FDF1EC;
+  --color-caramel-border:#F5C9B0;
+  --color-cream:         #F7F7F8;
+  --color-cream-border:  #E2E2E6;
+  --color-muted:         #8A8A94;
 }
 
 @layer base {
   * { box-sizing: border-box; }
-  body { font-family: var(--font-body), sans-serif; }
-  h1, h2, h3 { font-family: var(--font-display), serif; }
+
+  body {
+    font-family: 'Noto Sans Thai', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Noto Sans Thai', sans-serif;
+  }
 }
 
 @layer utilities {
-  .font-display { font-family: var(--font-display), serif; }
-  .font-body    { font-family: var(--font-body), sans-serif; }
+  /* gradient text helper */
+  .grad-text {
+    background: linear-gradient(135deg, #C97B4B, #E8845A, #E87D9E);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .grad-bg {
+    background: linear-gradient(135deg, #C97B4B, #E8845A, #E87D9E);
+  }
+
+  /* keep legacy font-display/font-body classes working */
+  .font-display { font-family: 'Noto Sans Thai', sans-serif; }
+  .font-body    { font-family: 'Noto Sans Thai', sans-serif; }
 }

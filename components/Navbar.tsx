@@ -12,18 +12,21 @@ const LINKS = [
 export default function Navbar() {
   const path = usePathname()
   return (
-    <nav className="flex items-center justify-between px-6 py-3 bg-white border-b border-cream-border sticky top-0 z-10">
-      <Link href="/" className="font-display text-xl font-semibold text-coffee">
-        SweetMolar<sup className="text-[10px] text-caramel font-body font-normal">Q</sup>
+    <nav className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm">
+      <Link href="/" className="text-lg font-extrabold text-ink tracking-tight">
+        SweetMolar<span className="grad-text">Q</span>
       </Link>
-      <div className="flex gap-2">
+      <div className="flex gap-1.5">
         {LINKS.map(link => (
-          <Link key={link.href} href={link.href}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+          <Link
+            key={link.href}
+            href={link.href}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-colors font-medium ${
               path === link.href
-                ? 'bg-caramel-pale border-caramel-border text-coffee font-medium'
-                : 'border-cream-border text-muted hover:border-caramel hover:text-coffee'
-            }`}>
+                ? 'border-orange-200 bg-orange-50 text-accent-dk'
+                : 'border-gray-200 text-gray-500 hover:border-accent hover:text-accent-dk'
+            }`}
+          >
             {link.label}
           </Link>
         ))}
