@@ -2,9 +2,10 @@
 // Supabase browser client — use in Client Components
 import { createBrowserClient } from '@supabase/ssr'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
-
 export function createClient() {
-  return createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  // Fall back to placeholder values at build-time so static generation
+  // doesn't crash. Real values MUST be set as env vars on the host (Vercel).
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key-for-build-only'
+  return createBrowserClient(url, key)
 }
