@@ -1,247 +1,178 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { Cormorant_Garamond, Plus_Jakarta_Sans } from 'next/font/google'
+import { useState } from 'react'
+import Navbar from '@/components/Navbar'
+import IngredientLibrary from '@/components/calculator/IngredientLibrary'
+import RecipeBuilder from '@/components/calculator/RecipeBuilder'
+import { useAuth } from '@/components/AuthProvider'
+import { useIngredients } from '@/lib/useIngredients'
+import { useRecipes } from '@/lib/useRecipes'
 
-const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-display',
-})
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['300', '400', '500'],
-  variable: '--font-body',
-})
-
-// ---- Types ----
-type Ingredient = {
-  id: number
-  name: string
-  grams: number
-  pricePerKg: number
-}
-
-type Category = {
-  label: string
-  emoji: string
-  color: string
-}
-
-const CATEGORIES: Category[] = [
-  { label: 'เบเกอรี่', emoji: '🥐', color: 'amber' },
-  { label: 'เค้ก',    emoji: '🎂', color: 'yellow' },
-  { label: 'เครื่องดื่ม', emoji: '☕', color: 'green' },
-  { label: 'คุกกี้',  emoji: '🍪', color: 'purple' },
-  { label: 'ช็อกโกแลต', emoji: '🍫', color: 'caramel' },
-]
-
-const DEFAULT_INGREDIENTS: Ingredient[] = [
-  { id: 1, name: '🥛 นม',      grams: 300, pricePerKg: 55 },
-  { id: 2, name: '🧈 เนย',     grams: 120, pricePerKg: 220 },
-  { id: 3, name: '🌾 แป้ง',    grams: 200, pricePerKg: 35 },
-  { id: 4, name: '🥚 ไข่',     grams: 100, pricePerKg: 90 },
-  { id: 5, name: '🍬 น้ำตาล', grams: 80,  pricePerKg: 40 },
-]
-
-const CAT_STYLES: Record<string, string> = {
-  amber:   'bg-amber-50   border-amber-200   text-amber-700',
-  yellow:  'bg-yellow-50  border-yellow-200  text-yellow-700',
-  green:   'bg-green-50   border-green-200   text-green-700',
-  purple:  'bg-purple-50  border-purple-200  text-purple-700',
-  caramel: 'bg-orange-50  border-orange-200  text-orange-700',
-}
+type Tab = 'library' | 'recipe'
 
 export default function CalculatorPage() {
-  const [ingredients, setIngredients] = useState<Ingredient[]>(DEFAULT_INGREDIENTS)
-  const [portions, setPortions]       = useState(12)
-  const [overhead, setOverhead]       = useState(20)
-  const [packaging, setPackaging]     = useState(5)
-  const [margin, setMargin]           = useState(65)
-  const [category, setCategory]       = useState<Category>(CATEGORIES[1])
-  const [nextId, setNextId]           = useState(10)
+  const { user, loading: authLoading, signInWithGoogle } = useAuth()
+  const [tab, setTab] = useState<Tab>('library')
 
-  // ---- Calculations ----
-  const ingCost     = ingredients.reduce((sum, ing) => sum + (ing.grams / 1000) * ing.pricePerKg, 0)
-  const batchCost   = ingCost + overhead
-  const costPerUnit = batchCost / Math.max(portions, 1)
-  const fullCost    = costPerUnit + packaging
-  const sellPrice   = fullCost / (1 - margin / 100)
-  const fcPct       = sellPrice > 0 ? (costPerUnit / sellPrice) * 100 : 0
-  const status      = ingCost === 0 ? 'empty' : fcPct <= 30 ? 'good' : fcPct <= 40 ? 'warn' : 'bad'
+  const {
+    ingredients, loading: ingLoading,
+    create: createIng, update: updateIng, remove: removeIng,
+  } = useIngredients(user?.id)
 
-  const updateIng = useCallback((id: number, field: keyof Ingredient, value: string | number) => {
-    setIngredients(prev => prev.map(ing => ing.id === id ? { ...ing, [field]: value } : ing))
-  }, [])
+  const {
+    recipes, loading: recLoading,
+    createRecipe, updateRecipe, deleteRecipe,
+    addLine, removeLine, updateLine,
+  } = useRecipes(user?.id)
 
-  const addIng = () => {
-    setIngredients(prev => [...prev, { id: nextId, name: '', grams: 0, pricePerKg: 0 }])
-    setNextId(n => n + 1)
+  // ── Auth loading ──────────────────────────────────────────
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-gray-200 border-t-orange-400
+                        rounded-full animate-spin" />
+      </div>
+    )
   }
 
-  const removeIng = (id: number) => setIngredients(prev => prev.filter(ing => ing.id !== id))
+  // ── Not signed in ─────────────────────────────────────────
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center px-6 py-20">
+          <div className="max-w-sm w-full text-center">
+            <div className="text-5xl mb-5">🔐</div>
+            <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight mb-2">
+              เข้าสู่ระบบก่อนเริ่มใช้งาน
+            </h2>
+            <p className="text-sm text-gray-500 leading-relaxed mb-7">
+              ข้อมูล Library และ Recipe ของคุณจะถูกบันทึกบน cloud
+              และ sync ข้ามอุปกรณ์ได้อัตโนมัติ
+            </p>
+            <button
+              onClick={signInWithGoogle}
+              className="inline-flex items-center gap-3 w-full justify-center
+                         py-3 px-6 bg-white border-2 border-gray-200 rounded-2xl
+                         text-sm font-bold text-gray-700 shadow-sm
+                         hover:border-orange-300 hover:bg-orange-50 transition-all"
+            >
+              <GoogleColorIcon />
+              เข้าสู่ระบบด้วย Google
+            </button>
+            <p className="text-[11px] text-gray-400 mt-4">
+              ฟรี 100% · ไม่มีค่าใช้จ่าย · ไม่ต้องใช้บัตรเครดิต
+            </p>
+            <div className="mt-8 flex gap-2 justify-center flex-wrap">
+              {['🧂 บันทึก Library วัตถุดิบ','🧁 สร้างสูตรอาหาร','☁️ Sync ข้ามอุปกรณ์'].map(t => (
+                <span key={t} className="text-[11px] px-3 py-1 bg-orange-50 text-orange-700
+                                         border border-orange-200 rounded-full font-medium">
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
+  // ── Signed in ─────────────────────────────────────────────
   return (
-    <div className={`${cormorant.variable} ${jakarta.variable} min-h-screen bg-cream font-body`}>
+    <div className="min-h-screen bg-gray-50" style={{ fontFamily: "'Noto Sans Thai',sans-serif" }}>
+      <Navbar />
 
-      {/* NAV */}
-      <nav className="flex items-center justify-between px-6 py-3 bg-white border-b border-cream-border">
-        <a href="/" className="font-display text-xl font-semibold text-coffee">
-          SweetMolar<sup className="text-[10px] text-caramel font-body font-normal">Q</sup>
-        </a>
-        <div className="flex gap-2">
-          {[{ href: '/calculator', label: '🧮 ต้นทุน', active: true  },
-            { href: '/menu',       label: '📊 เมนู',    active: false },
-            { href: '/breakeven',  label: '💰 Break-even', active: false }]
-            .map(link => (
-              <a key={link.href} href={link.href}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                  link.active
-                    ? 'bg-amber-50 border-amber-200 text-coffee font-medium'
-                    : 'border-cream-border text-muted hover:border-caramel'
-                }`}>
-                {link.label}
-              </a>
-            ))}
-        </div>
-      </nav>
-
-      {/* HERO STRIP */}
-      <div className="bg-white border-b border-cream-border px-6 py-4 flex items-center gap-4">
-        <div className="text-2xl flex gap-1">
-          {Array.from('☕🫘🥐🎂🍪🧁🍫🥛🍰🫖').map((e, i) => <span key={i}>{e}</span>)}
-        </div>
-        <div>
-          <h1 className="font-display text-2xl font-semibold text-coffee">Recipe Cost Calculator</h1>
-          <p className="text-xs text-amber-600 font-light mt-0.5">ใส่ส่วนผสม → รู้ต้นทุนและราคาขายที่เหมาะสมทันที</p>
+      {/* page header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {(['☕','🧁','🥐','🎂','🍪','🍫'] as const).map((e, i) => (
+                <span key={i} className="text-xl">{e}</span>
+              ))}
+            </div>
+            <h1 className="text-xl font-extrabold text-gray-900 tracking-tight mt-1">
+              Recipe Cost Calculator
+            </h1>
+            <p className="text-xs text-gray-400 mt-0.5">
+              จัดการ Library วัตถุดิบ และคำนวณต้นทุนสูตรอาหาร
+            </p>
+          </div>
+          {/* quick stats */}
+          <div className="flex gap-3">
+            <Stat label="วัตถุดิบ" value={ingredients.length} />
+            <Stat label="สูตร"     value={recipes.length} />
+          </div>
         </div>
       </div>
 
-      {/* MAIN GRID */}
-      <div className="max-w-3xl mx-auto p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-
-        {/* INGREDIENTS PANEL */}
-        <div className="bg-white border border-cream-border rounded-2xl overflow-hidden shadow-sm">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-cream-border">
-            <span className="text-lg">🧾</span>
-            <span className="text-sm font-medium">ส่วนผสม (Ingredients)</span>
-          </div>
-          <div className="p-4">
-            <div className="grid grid-cols-[1fr_64px_72px_28px] gap-1.5 mb-2">
-              <span className="text-[10px] text-muted">ชื่อส่วนผสม</span>
-              <span className="text-[10px] text-muted text-center">กรัม</span>
-              <span className="text-[10px] text-muted text-center">฿/กก.</span>
-              <span></span>
-            </div>
-            {ingredients.map(ing => (
-              <div key={ing.id} className="grid grid-cols-[1fr_64px_72px_28px] gap-1.5 mb-2 items-center">
-                <input value={ing.name} onChange={e => updateIng(ing.id, 'name', e.target.value)}
-                  placeholder="ชื่อส่วนผสม"
-                  className="w-full px-2 py-1 text-xs rounded-lg border border-cream-border bg-cream
-                             focus:outline-none focus:border-caramel" />
-                <input type="number" min={0} value={ing.grams}
-                  onChange={e => updateIng(ing.id, 'grams', +e.target.value)}
-                  className="w-full px-2 py-1 text-xs rounded-lg border border-cream-border bg-cream
-                             focus:outline-none focus:border-caramel text-center" />
-                <input type="number" min={0} value={ing.pricePerKg}
-                  onChange={e => updateIng(ing.id, 'pricePerKg', +e.target.value)}
-                  className="w-full px-2 py-1 text-xs rounded-lg border border-cream-border bg-cream
-                             focus:outline-none focus:border-caramel text-center" />
-                <button onClick={() => removeIng(ing.id)}
-                  className="w-7 h-7 rounded-lg border border-cream-border bg-cream text-muted
-                             flex items-center justify-center hover:bg-red-50 hover:border-red-300
-                             hover:text-red-500 transition-colors text-sm">×</button>
-              </div>
-            ))}
-            <button onClick={addIng}
-              className="text-xs text-caramel hover:text-coffee transition-colors mt-1">
-              ＋ เพิ่มส่วนผสม
+      {/* tabs */}
+      <div className="bg-white border-b border-gray-200 px-6">
+        <div className="max-w-5xl mx-auto flex gap-0">
+          {([
+            { key: 'library', label: '🧂 Library วัตถุดิบ' },
+            { key: 'recipe',  label: '🧁 สูตรอาหาร' },
+          ] as { key: Tab; label: string }[]).map(t => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`px-5 py-3 text-xs font-bold border-b-2 transition-colors ${
+                tab === t.key
+                  ? 'border-accent text-accent-dk'
+                  : 'border-transparent text-gray-400 hover:text-gray-600'
+              }`}>
+              {t.label}
             </button>
-          </div>
+          ))}
         </div>
+      </div>
 
-        {/* RECIPE INFO PANEL */}
-        <div className="bg-white border border-cream-border rounded-2xl overflow-hidden shadow-sm">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-cream-border">
-            <span className="text-lg">⚙️</span>
-            <span className="text-sm font-medium">ข้อมูล Recipe</span>
-          </div>
-          <div className="p-4 space-y-3">
-            {[{ label: '🍽️ จำนวน (ชิ้น/แก้ว)', val: portions, set: setPortions, unit: 'ชิ้น'     },
-              { label: '⚡ ค่าใช้จ่ายอื่น',       val: overhead, set: setOverhead, unit: '฿/batch'  },
-              { label: '📦 ค่า packaging',         val: packaging,set: setPackaging,unit: '฿/ชิ้น'  }]
-              .map(row => (
-                <div key={row.label} className="flex items-center justify-between">
-                  <span className="text-xs text-muted">{row.label}</span>
-                  <div className="flex items-center gap-1">
-                    <input type="number" min={0} value={row.val}
-                      onChange={e => row.set(+e.target.value)}
-                      className="w-20 px-2 py-1 text-xs rounded-lg border border-cream-border
-                                 bg-cream text-right focus:outline-none focus:border-caramel" />
-                    <span className="text-[10px] text-muted w-12">{row.unit}</span>
-                  </div>
-                </div>
-              ))}
-            <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-muted">📈 Margin เป้าหมาย</span>
-                <span className="text-coffee font-medium">{margin}%</span>
-              </div>
-              <input type="range" min={20} max={85} step={1} value={margin}
-                onChange={e => setMargin(+e.target.value)}
-                className="w-full accent-caramel" />
-            </div>
-            <div>
-              <p className="text-xs text-muted mb-1.5">🏷️ ประเภท</p>
-              <div className="flex gap-1.5 flex-wrap">
-                {CATEGORIES.map(cat => (
-                  <button key={cat.label} onClick={() => setCategory(cat)}
-                    className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
-                      category.label === cat.label
-                        ? CAT_STYLES[cat.color]
-                        : 'border-cream-border text-muted bg-cream hover:border-caramel'
-                    }`}>
-                    {cat.emoji} {cat.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* RESULT PANEL — full width */}
-        <div className="md:col-span-2 bg-white border border-cream-border rounded-2xl overflow-hidden shadow-sm">
-          <div className="flex items-center gap-2 px-5 py-3 bg-amber-50 border-b border-amber-100">
-            <span>✨</span>
-            <span className="text-sm font-medium text-coffee">ผลการคำนวณ</span>
-            <span className="ml-auto text-xs text-amber-500">{category.emoji} {category.label}</span>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-cream-border">
-            {[{ emoji: '🫙', label: 'ต้นทุนวัตถุดิบ/batch', value: `฿${batchCost.toFixed(0)}`,  sub: `฿${costPerUnit.toFixed(1)}/ชิ้น` },
-              { emoji: '🏷️', label: 'ต้นทุนรวมต่อชิ้น',     value: `฿${fullCost.toFixed(1)}`,  sub: 'รวม overhead+pack'               },
-              { emoji: '💰', label: 'ราคาขายแนะนำ',          value: `฿${Math.ceil(sellPrice)}`, sub: `margin ${margin}%`, green: true    },
-              { emoji: '📊', label: 'Food cost %',            value: `${fcPct.toFixed(0)}%`,     sub: 'เป้า <35%',
-                colorClass: status==='good'?'text-green-600':status==='bad'?'text-red-500':'text-coffee' }]
-              .map((cell, i) => (
-                <div key={i} className="p-4 text-center">
-                  <div className="text-2xl mb-1">{cell.emoji}</div>
-                  <div className="text-[10px] text-muted mb-0.5">{cell.label}</div>
-                  <div className={`font-display text-2xl font-semibold ${
-                    cell.colorClass ?? (cell.green ? 'text-green-700' : 'text-coffee')
-                  }`}>{cell.value}</div>
-                  <div className="text-[10px] text-muted mt-0.5">{cell.sub}</div>
-                </div>
-              ))}
-          </div>
-          <div className="flex items-center gap-3 px-5 py-3 border-t border-cream-border flex-wrap">
-            {status === 'empty' && <span className="text-xs text-muted">กรอกส่วนผสมเพื่อดูคำแนะนำ</span>}
-            {status === 'good'  && <><span className="text-xs px-3 py-1 rounded-full bg-green-50 border border-green-200 text-green-700 font-medium">✓ กำไรดี</span><span className="text-xs text-muted">Food cost {fcPct.toFixed(0)}% — ดีมาก! เหมาะสำหรับ promote</span></>}
-            {status === 'warn'  && <><span className="text-xs px-3 py-1 rounded-full bg-yellow-50 border border-yellow-200 text-yellow-700 font-medium">⚠ พอได้</span><span className="text-xs text-muted">Food cost {fcPct.toFixed(0)}% — ลองลดต้นทุนหรือขึ้นราคาเล็กน้อย</span></>}
-            {status === 'bad'   && <><span className="text-xs px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 font-medium">✗ ควรปรับ</span><span className="text-xs text-muted">Food cost {fcPct.toFixed(0)}% — สูงเกินไป ควรลดต้นทุนหรือปรับราคาขาย</span></>}
-          </div>
-        </div>
-
+      {/* content */}
+      <div className="max-w-5xl mx-auto px-6 py-6">
+        {tab === 'library' ? (
+          <IngredientLibrary
+            ingredients={ingredients}
+            loading={ingLoading}
+            onCreate={createIng}
+            onUpdate={updateIng}
+            onDelete={removeIng}
+          />
+        ) : (
+          <RecipeBuilder
+            recipes={recipes}
+            ingredients={ingredients}
+            loading={recLoading}
+            onCreate={createRecipe}
+            onUpdate={updateRecipe}
+            onDelete={deleteRecipe}
+            onAddLine={addLine}
+            onRemoveLine={removeLine}
+            onUpdateLine={updateLine}
+          />
+        )}
       </div>
     </div>
+  )
+}
+
+/* ── Sub-components ── */
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="text-center px-4 py-2 bg-orange-50 border border-orange-200 rounded-xl">
+      <p className="text-lg font-extrabold grad-text leading-none">{value}</p>
+      <p className="text-[10px] text-gray-500 mt-0.5 font-medium">{label}</p>
+    </div>
+  )
+}
+
+function GoogleColorIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24">
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+    </svg>
   )
 }

@@ -23,9 +23,9 @@ const TOOLS = [
     iconBg: 'bg-pink-50',
     name: 'Menu Profitability Analyzer',
     nameTh: 'วิเคราะห์ความสามารถทำกำไรเมนู',
-    desc: 'วิเคราะห์ทุกเมนูด้วย Menu Engineering Matrix แบบ BCG — รู้ทันทีว่าอันไหน Star, Dog, Plow Horse หรือ Puzzle',
+    desc: 'วิเคราะห์ทุกเมนูจากกำไรและยอดขาย — รู้ทันทีว่าอันไหน Star, Dog, Plow Horse หรือ Puzzle',
     feats: [
-      'Menu Engineering Matrix (BCG model)',
+      'จัดกลุ่มเมนูเป็น 4 แบบ: Star, Dog, Plow Horse, Puzzle',
       'แนะนำว่าควรตัดหรือ promote เมนูไหน',
       'เปรียบเทียบ margin vs. ยอดขาย',
       'วิเคราะห์ได้ไม่จำกัดเมนู',
@@ -105,6 +105,8 @@ const BELIEFS = [
   { icon: '💡', text: 'เครื่องมือดีๆ ไม่ควรแพงหรือซับซ้อน — ใช้ง่าย เข้าใจง่าย และฟรีดีที่สุด' },
   { icon: '🎯', text: 'ตั้งราคาด้วยตัวเลขจริง ไม่ใช่ความรู้สึก — นั่นคือก้าวแรกของร้านที่ยั่งยืน' },
 ]
+
+const FOOTER_EMOJI_RAIN = ['☕', '🧁', '🍪', '🥐', '🍫', '💖', '✨']
 
 export default function HomePage() {
   return (
@@ -415,7 +417,25 @@ export default function HomePage() {
       </section>
 
       {/* ═══ FOOTER ═══ */}
-      <footer className="bg-white border-t border-gray-200 px-6 py-10 text-center">
+      <footer className="relative overflow-hidden bg-white border-t border-gray-200 px-6 py-10 text-center">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          {FOOTER_EMOJI_RAIN.map((emoji, i) => (
+            <span
+              key={`${emoji}-${i}`}
+              className="emoji-fall absolute text-lg opacity-70"
+              style={{
+                left: `${8 + i * 13}%`,
+                top: '-22px',
+                animationDelay: `${i * 0.7}s`,
+                animationDuration: `${6.5 + (i % 3) * 1.2}s`,
+              }}
+            >
+              {emoji}
+            </span>
+          ))}
+        </div>
+
+        <div className="relative z-10">
         <div className="text-xl font-extrabold text-ink tracking-tight mb-1">
           SweetMolar<span className="grad-text">Q</span>
         </div>
@@ -448,6 +468,7 @@ export default function HomePage() {
         <p className="text-[10px] text-gray-300">
           Data meets Cafe · Thailand · 2026 · Built with ❤️ by a Data Engineer who loves coffee
         </p>
+        </div>
       </footer>
     </div>
   )

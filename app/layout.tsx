@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { Noto_Sans_Thai } from 'next/font/google'
+import { AuthProvider } from '@/components/AuthProvider'
 import './globals.css'
 
 const notoSansThai = Noto_Sans_Thai({
@@ -13,7 +14,7 @@ const notoSansThai = Noto_Sans_Thai({
 export const metadata: Metadata = {
   title: 'SweetMolarQ — เครื่องมือคำนวณที่ Cafe & Bakery ต้องการ',
   description:
-    'คำนวณต้นทุน Recipe, วิเคราะห์ Menu Engineering Matrix และคำนวณ Break-Even สำหรับ cafe และ home baker — ใช้งานฟรี ไม่ต้องติดตั้ง',
+    'คำนวณต้นทุน Recipe, วิเคราะห์กำไรของเมนู และคำนวณ Break-Even สำหรับ cafe และ home baker — ใช้งานฟรี ไม่ต้องติดตั้ง',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -23,7 +24,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         className="font-body bg-bg text-ink antialiased"
         style={{ fontFamily: "'Noto Sans Thai', sans-serif" }}
       >
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   )

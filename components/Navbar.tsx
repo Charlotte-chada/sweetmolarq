@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import UserMenu from '@/components/UserMenu'
 
 const LINKS = [
   { href: '/calculator', label: '🧮 ต้นทุน' },
@@ -16,20 +17,23 @@ export default function Navbar() {
       <Link href="/" className="text-lg font-extrabold text-ink tracking-tight">
         SweetMolar<span className="grad-text">Q</span>
       </Link>
-      <div className="flex gap-1.5">
-        {LINKS.map(link => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors font-medium ${
-              path === link.href
-                ? 'border-orange-200 bg-orange-50 text-accent-dk'
-                : 'border-gray-200 text-gray-500 hover:border-accent hover:text-accent-dk'
-            }`}
-          >
-            {link.label}
-          </Link>
-        ))}
+      <div className="flex items-center gap-2">
+        <div className="hidden sm:flex gap-1.5">
+          {LINKS.map(link => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-colors font-medium ${
+                path === link.href
+                  ? 'border-orange-200 bg-orange-50 text-accent-dk'
+                  : 'border-gray-200 text-gray-500 hover:border-accent hover:text-accent-dk'
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+        <UserMenu />
       </div>
     </nav>
   )
